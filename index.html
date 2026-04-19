@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>p5.js Barcode Scanner</title>
-  
+  <title>p5.js GS1 Barcode Scanner</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-  
   <style>
     body { 
       margin: 0; 
@@ -25,46 +23,170 @@
 <script>
   let capture;
   let barcodeText = "Point camera at a barcode...";
+  let countryText = "";
   let barcodeDetector;
+
+  // GS1 Country Code Ranges based on standard GS1 prefixes
+  const gs1Ranges = [
+    { min: 0, max: 139, name: "US and Canada" },
+    { min: 200, max: 299, name: "Restricted circulation (Local)" },
+    { min: 300, max: 379, name: "France and Monaco" },
+    { min: 380, max: 380, name: "Bulgaria" },
+    { min: 383, max: 383, name: "Slovenia" },
+    { min: 385, max: 385, name: "Croatia" },
+    { min: 387, max: 387, name: "Bosnia and Herzegovina" },
+    { min: 389, max: 389, name: "Montenegro" },
+    { min: 400, max: 440, name: "Germany" },
+    { min: 450, max: 459, name: "Japan" },
+    { min: 460, max: 469, name: "Russia" },
+    { min: 470, max: 470, name: "Kyrgyzstan" },
+    { min: 471, max: 471, name: "Taiwan" },
+    { min: 474, max: 474, name: "Estonia" },
+    { min: 475, max: 475, name: "Latvia" },
+    { min: 476, max: 476, name: "Azerbaijan" },
+    { min: 477, max: 477, name: "Lithuania" },
+    { min: 478, max: 478, name: "Uzbekistan" },
+    { min: 479, max: 479, name: "Sri Lanka" },
+    { min: 480, max: 480, name: "Philippines" },
+    { min: 481, max: 481, name: "Belarus" },
+    { min: 482, max: 482, name: "Ukraine" },
+    { min: 484, max: 484, name: "Moldova" },
+    { min: 485, max: 485, name: "Armenia" },
+    { min: 486, max: 486, name: "Georgia" },
+    { min: 487, max: 487, name: "Kazakhstan" },
+    { min: 488, max: 488, name: "Tajikistan" },
+    { min: 489, max: 489, name: "Hong Kong" },
+    { min: 490, max: 499, name: "Japan" },
+    { min: 500, max: 509, name: "United Kingdom" },
+    { min: 520, max: 521, name: "Greece" },
+    { min: 528, max: 528, name: "Lebanon" },
+    { min: 529, max: 529, name: "Cyprus" },
+    { min: 531, max: 531, name: "North Macedonia" },
+    { min: 535, max: 535, name: "Malta" },
+    { min: 539, max: 539, name: "Ireland" },
+    { min: 540, max: 549, name: "Belgium and Luxembourg" },
+    { min: 560, max: 560, name: "Portugal" },
+    { min: 569, max: 569, name: "Iceland" },
+    { min: 570, max: 579, name: "Denmark, Faroe Islands and Greenland" },
+    { min: 590, max: 590, name: "Poland" },
+    { min: 594, max: 594, name: "Romania" },
+    { min: 599, max: 599, name: "Hungary" },
+    { min: 600, max: 601, name: "South Africa" },
+    { min: 603, max: 603, name: "Ghana" },
+    { min: 604, max: 604, name: "Senegal" },
+    { min: 608, max: 608, name: "Bahrain" },
+    { min: 609, max: 609, name: "Mauritius" },
+    { min: 611, max: 611, name: "Morocco" },
+    { min: 613, max: 613, name: "Algeria" },
+    { min: 615, max: 615, name: "Nigeria" },
+    { min: 616, max: 616, name: "Kenya" },
+    { min: 618, max: 618, name: "Ivory Coast" },
+    { min: 619, max: 619, name: "Tunisia" },
+    { min: 621, max: 621, name: "Syria" },
+    { min: 622, max: 622, name: "Egypt" },
+    { min: 624, max: 624, name: "Libya" },
+    { min: 625, max: 625, name: "Jordan" },
+    { min: 626, max: 626, name: "Iran" },
+    { min: 627, max: 627, name: "Kuwait" },
+    { min: 628, max: 628, name: "Saudi Arabia" },
+    { min: 629, max: 629, name: "United Arab Emirates" },
+    { min: 640, max: 649, name: "Finland" },
+    { min: 690, max: 699, name: "China" },
+    { min: 700, max: 709, name: "Norway" },
+    { min: 729, max: 729, name: "Israel" },
+    { min: 730, max: 739, name: "Sweden" },
+    { min: 740, max: 740, name: "Guatemala" },
+    { min: 741, max: 741, name: "El Salvador" },
+    { min: 742, max: 742, name: "Honduras" },
+    { min: 743, max: 743, name: "Nicaragua" },
+    { min: 744, max: 744, name: "Costa Rica" },
+    { min: 745, max: 745, name: "Panama" },
+    { min: 746, max: 746, name: "Dominican Republic" },
+    { min: 750, max: 750, name: "Mexico" },
+    { min: 754, max: 755, name: "Canada" },
+    { min: 759, max: 759, name: "Venezuela" },
+    { min: 760, max: 769, name: "Switzerland and Liechtenstein" },
+    { min: 770, max: 771, name: "Colombia" },
+    { min: 773, max: 773, name: "Uruguay" },
+    { min: 775, max: 775, name: "Peru" },
+    { min: 777, max: 777, name: "Bolivia" },
+    { min: 779, max: 779, name: "Argentina" },
+    { min: 780, max: 780, name: "Chile" },
+    { min: 784, max: 784, name: "Paraguay" },
+    { min: 786, max: 786, name: "Ecuador" },
+    { min: 789, max: 790, name: "Brazil" },
+    { min: 800, max: 839, name: "Italy, San Marino and Vatican City" },
+    { min: 840, max: 849, name: "Spain and Andorra" },
+    { min: 850, max: 850, name: "Cuba" },
+    { min: 858, max: 858, name: "Slovakia" },
+    { min: 859, max: 859, name: "Czech Republic" },
+    { min: 860, max: 860, name: "Serbia" },
+    { min: 865, max: 865, name: "Mongolia" },
+    { min: 867, max: 867, name: "North Korea" },
+    { min: 868, max: 869, name: "Turkey" },
+    { min: 870, max: 879, name: "Netherlands" },
+    { min: 880, max: 881, name: "South Korea" },
+    { min: 884, max: 884, name: "Cambodia" },
+    { min: 885, max: 885, name: "Thailand" },
+    { min: 888, max: 888, name: "Singapore" },
+    { min: 890, max: 890, name: "India" },
+    { min: 893, max: 893, name: "Vietnam" },
+    { min: 896, max: 896, name: "Pakistan" },
+    { min: 899, max: 899, name: "Indonesia" },
+    { min: 900, max: 919, name: "Austria" },
+    { min: 930, max: 939, name: "Australia" },
+    { min: 940, max: 949, name: "New Zealand" },
+    { min: 955, max: 955, name: "Malaysia" },
+    { min: 958, max: 958, name: "Macau" }
+  ];
+
+  // Helper function to find the country by prefix
+  function getCountryFromPrefix(prefixStr) {
+    let prefix = parseInt(prefixStr, 10);
+    
+    // Safety check if the barcode was shorter than 3 characters or not a number
+    if (isNaN(prefix)) return "Invalid Barcode";
+
+    for (let i = 0; i < gs1Ranges.length; i++) {
+      if (prefix >= gs1Ranges[i].min && prefix <= gs1Ranges[i].max) {
+        return "Country: " + gs1Ranges[i].name;
+      }
+    }
+    
+    // EAN/UPC prefixes not on the list are reserved for future use or internal 
+    return "Country: Unknown / Reserved";
+  }
 
   function setup() {
     createCanvas(windowWidth, windowHeight);
 
-    // 1. Request the rear camera (environment facing)
     let constraints = {
       video: {
-        facingMode: { exact: "environment" } // Forces back camera on mobile
+        facingMode: { exact: "environment" }
       },
       audio: false
     };
 
-    // Fallback if exact environment camera fails (e.g., on desktop)
     try {
       capture = createCapture(constraints);
     } catch (e) {
       capture = createCapture(VIDEO);
     }
-    
-    capture.hide(); // Hide the default HTML video element created by p5
+    capture.hide(); 
 
-    // 2. Initialize the BarcodeDetector API
-    // Note: This is a modern web API. It works beautifully on Chrome/Android, 
-    // but may have limited support on older iOS versions.
     if ('BarcodeDetector' in window) {
       barcodeDetector = new BarcodeDetector({ 
         formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e'] 
       });
     } else {
-      barcodeText = "Barcode Detection API not supported on this browser.";
+      barcodeText = "Barcode API not supported.";
     }
   }
 
   function draw() {
     background(34);
 
-    // Draw the camera feed to the canvas if it's ready
     if (capture.width > 0) {
-      // Calculate aspect ratio to fit the screen nicely
       let videoAspect = capture.width / capture.height;
       let canvasAspect = width / height;
       let drawWidth, drawHeight;
@@ -77,20 +199,21 @@
         drawWidth = height * videoAspect;
       }
 
-      // Center the video
       let x = (width - drawWidth) / 2;
       let y = (height - drawHeight) / 2;
 
       image(capture, x, y, drawWidth, drawHeight);
 
-      // 3. Scan the video frame for barcodes
-      // We only check every 10 frames to keep the app running smoothly and save battery
+      // Scan for barcodes every 10 frames
       if (barcodeDetector && frameCount % 10 === 0) {
         barcodeDetector.detect(capture.elt)
           .then(barcodes => {
             if (barcodes.length > 0) {
-              // Get the value of the first barcode detected
               barcodeText = barcodes[0].rawValue;
+              
+              // NEW LOGIC: Slice the first 3 characters and get the country
+              let prefixStr = barcodeText.substring(0, 3);
+              countryText = getCountryFromPrefix(prefixStr);
             }
           })
           .catch(err => {
@@ -99,29 +222,31 @@
       }
     }
 
-    // 4. Draw the UI (Target box and Text display)
-    
-    // Draw a visual target box in the center
+    // Target Box
     noFill();
     stroke(0, 255, 0);
     strokeWeight(4);
     rectMode(CENTER);
     rect(width / 2, height / 2, width * 0.7, height * 0.2, 20);
 
-    // Draw the text box at the bottom
+    // Text box at the bottom (made slightly taller to fit two lines of text)
     rectMode(CORNER);
     fill(0, 150);
     noStroke();
-    rect(0, height - 100, width, 100);
+    rect(0, height - 120, width, 120); 
 
-    // Display the barcode text
+    // Display the barcode raw number
     fill(0, 255, 0);
     textSize(24);
     textAlign(CENTER, CENTER);
-    text(barcodeText, width / 2, height - 50);
+    text(barcodeText, width / 2, height - 85);
+
+    // Display the calculated country
+    fill(255); // White color to differentiate from the barcode number
+    textSize(18);
+    text(countryText, width / 2, height - 40);
   }
 
-  // Adjust canvas if the user rotates their phone
   function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
   }

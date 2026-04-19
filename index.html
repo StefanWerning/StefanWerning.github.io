@@ -149,7 +149,7 @@
     for (let i = 0; i < gs1Ranges.length; i++) {
       if (prefix >= gs1Ranges[i].min && prefix <= gs1Ranges[i].max) {
         let tmp="";
-        if (gs1Ranges[i].img.length != 0) tmp=gs1Ranges[i].img;
+        tmp=gs1Ranges[i].img;
         return [gs1Ranges[i].name,tmp];
       }
     }
@@ -158,6 +158,10 @@
     return "Country Unknown / Reserved";
   }
 
+  function preload() {
+    img = loadImage('https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/40px-Flag_of_the_United_States.svg.png');
+    let tmp = "https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/40px-Flag_of_the_United_States.svg.png";
+  }
   function setup() {
     createCanvas(windowWidth, windowHeight);
 
@@ -246,7 +250,10 @@
     fill(255); // White color to differentiate from the barcode number
     textSize(18);
     text(countryData[0], width / 2, height - 40);
-    image(countryData[1], 50, 0);
+    if (countryData[1].length != 0 && countryData[1]!=tmp){
+      img=loadImage(countryData[1]);
+    }
+    image(img, 50, 0);}
   }
 
   function windowResized() {

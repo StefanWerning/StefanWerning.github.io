@@ -19,6 +19,7 @@
   </style>
 </head>
 <body>
+
 <script>
   let capture;
   let barcodeText = "Point camera at a barcode...";
@@ -35,7 +36,7 @@
     { min: 385, max: 385, name: "Croatia" },
     { min: 387, max: 387, name: "Bosnia and Herzegovina" },
     { min: 389, max: 389, name: "Montenegro" },
-    { min: 400, max: 440, name: "Germany", img: "https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/40px-Flag_of_Germany.svg.png" },
+    { min: 400, max: 440, name: "Germany" },
     { min: 450, max: 459, name: "Japan" },
     { min: 460, max: 469, name: "Russia" },
     { min: 470, max: 470, name: "Kyrgyzstan" },
@@ -123,8 +124,8 @@
     { min: 865, max: 865, name: "Mongolia" },
     { min: 867, max: 867, name: "North Korea" },
     { min: 868, max: 869, name: "Turkey" },
-    { min: 870, max: 879, name: "Netherlands", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Flag_of_the_Netherlands.svg/40px-Flag_of_the_Netherlands.svg.png" },
-    { min: 880, max: 881, name: "South Korea" },
+    { min: 870, max: 879, name: "Netherlands" },
+    { min: 880, max: 880, name: "South Korea" },
     { min: 884, max: 884, name: "Cambodia" },
     { min: 885, max: 885, name: "Thailand" },
     { min: 888, max: 888, name: "Singapore" },
@@ -148,21 +149,14 @@
 
     for (let i = 0; i < gs1Ranges.length; i++) {
       if (prefix >= gs1Ranges[i].min && prefix <= gs1Ranges[i].max) {
-        let tmp="";
-        tmp=gs1Ranges[i].img;
-        //return [gs1Ranges[i].name,"tmp"];
-        return gs1Ranges[i].name;
+        return "Country: " + gs1Ranges[i].name;
       }
     }
     
     // EAN/UPC prefixes not on the list are reserved for future use or internal 
-    return "Country Unknown / Reserved";
+    return "Country: Unknown / Reserved";
   }
 
-  function preload() {
-    img = loadImage('https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/40px-Flag_of_the_United_States.svg.png');
-    let tmp = "https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/40px-Flag_of_the_United_States.svg.png";
-  }
   function setup() {
     createCanvas(windowWidth, windowHeight);
 
@@ -191,6 +185,7 @@
 
   function draw() {
     background(34);
+
     if (capture.width > 0) {
       let videoAspect = capture.width / capture.height;
       let canvasAspect = width / height;
@@ -218,7 +213,7 @@
               
               // NEW LOGIC: Slice the first 3 characters and get the country
               let prefixStr = barcodeText.substring(0, 3);
-              countryData = getCountryFromPrefix(prefixStr);
+              countryText = getCountryFromPrefix(prefixStr);
             }
           })
           .catch(err => {
@@ -226,8 +221,7 @@
           });
       }
     }
-    text('v0.22', 15, 15);
-
+    text ("v0.1",25,25);
     // Target Box
     noFill();
     stroke(0, 255, 0);
@@ -250,11 +244,7 @@
     // Display the calculated country
     fill(255); // White color to differentiate from the barcode number
     textSize(18);
-    text(countryData, width / 2, height - 40);
-    //if (countryData[1].length != 0 && countryData[1]!=tmp){
-    //  img=loadImage(countryData[1]);
-    //}
-    image(img, 50, 0);}
+    text(countryText, width / 2, height - 40);
   }
 
   function windowResized() {

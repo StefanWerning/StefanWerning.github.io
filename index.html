@@ -150,7 +150,8 @@
       if (prefix >= gs1Ranges[i].min && prefix <= gs1Ranges[i].max) {
         let tmp="";
         tmp=gs1Ranges[i].img;
-        return [gs1Ranges[i].name,"tmp"];
+        //return [gs1Ranges[i].name,"tmp"];
+        return gs1Ranges[i].name;
       }
     }
     
@@ -225,7 +226,7 @@
           });
       }
     }
-    text('v0.21', 15, 15);
+    text('v0.22', 15, 15);
 
     // Target Box
     noFill();
@@ -249,7 +250,7 @@
     // Display the calculated country
     fill(255); // White color to differentiate from the barcode number
     textSize(18);
-    text(countryData[0], width / 2, height - 40);
+    text(countryData, width / 2, height - 40);
     //if (countryData[1].length != 0 && countryData[1]!=tmp){
     //  img=loadImage(countryData[1]);
     //}

@@ -181,6 +181,7 @@
     } else {
       barcodeText = "Barcode API not supported.";
     }
+    let tmp = "1234567890123";
   }
 
   function draw() {
@@ -210,10 +211,19 @@
           .then(barcodes => {
             if (barcodes.length > 0) {
               barcodeText = barcodes[0].rawValue;
-              
-              // NEW LOGIC: Slice the first 3 characters and get the country
-              let prefixStr = barcodeText.substring(0, 3);
-              countryText = getCountryFromPrefix(prefixStr);
+              if (barcodeText != tmp) {
+                // NEW LOGIC: Slice the first 3 characters and get the country
+                let numericSeed = stringToHash(barcodeText);
+                randomSeed(numericSeed); // 2. Set the p5.js random seed
+                // 3. Generate the stats, Using floor(random(1, 21)) ensures an even distribution of integers from 1 to 20
+                strength = floor(random(1, 21));
+                dexterity = floor(random(1, 21));
+                charisma = floor(random(1, 21));
+                luck = floor(random(1, 21));
+                let prefixStr = barcodeText.substring(0, 3);
+                countryText = getCountryFromPrefix(prefixStr);
+                tmp=barcodeText; 
+              }
             }
           })
           .catch(err => {
@@ -221,7 +231,7 @@
           });
       }
     }
-    text ("v0.1",25,25);
+    text ("v0.2",25,25);
     // Target Box
     noFill();
     stroke(0, 255, 0);
@@ -245,6 +255,7 @@
     fill(255); // White color to differentiate from the barcode number
     textSize(18);
     text(countryText, width / 2, height - 40);
+    text("STR:"+strength+" | DEX:"+dexterity+" | CHR:"+charisma+"LCK:"+luck, width / 2, height - 20);
   }
 
   function windowResized() {

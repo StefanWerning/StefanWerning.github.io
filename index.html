@@ -36,7 +36,7 @@
     { min: 385, max: 385, name: "Croatia" },
     { min: 387, max: 387, name: "Bosnia and Herzegovina" },
     { min: 389, max: 389, name: "Montenegro" },
-    { min: 400, max: 440, name: "Germany" },
+    { min: 400, max: 440, name: "Germany", img: "https://upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/40px-Flag_of_Germany.svg.png" },
     { min: 450, max: 459, name: "Japan" },
     { min: 460, max: 469, name: "Russia" },
     { min: 470, max: 470, name: "Kyrgyzstan" },
@@ -124,7 +124,7 @@
     { min: 865, max: 865, name: "Mongolia" },
     { min: 867, max: 867, name: "North Korea" },
     { min: 868, max: 869, name: "Turkey" },
-    { min: 870, max: 879, name: "Netherlands" },
+    { min: 870, max: 879, name: "Netherlands", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Flag_of_the_Netherlands.svg/40px-Flag_of_the_Netherlands.svg.png" },
     { min: 880, max: 881, name: "South Korea" },
     { min: 884, max: 884, name: "Cambodia" },
     { min: 885, max: 885, name: "Thailand" },
@@ -149,7 +149,9 @@
 
     for (let i = 0; i < gs1Ranges.length; i++) {
       if (prefix >= gs1Ranges[i].min && prefix <= gs1Ranges[i].max) {
-        return "Country: " + gs1Ranges[i].name;
+        tmp="";
+        if (gs1Ranges[i].img.length != 0) tmp="<img src='"+gs1Ranges[i].img+"'>";
+        return "Country: " + gs1Ranges[i].name+tmp;
       }
     }
     
@@ -185,7 +187,7 @@
 
   function draw() {
     background(34);
-
+    text('v0.2', 15, 15);
     if (capture.width > 0) {
       let videoAspect = capture.width / capture.height;
       let canvasAspect = width / height;

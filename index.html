@@ -19,7 +19,6 @@
   </style>
 </head>
 <body>
-
 <script>
   let capture;
   let barcodeText = "Point camera at a barcode...";
@@ -187,7 +186,6 @@
 
   function draw() {
     background(34);
-    text('v0.2', 15, 15);
     if (capture.width > 0) {
       let videoAspect = capture.width / capture.height;
       let canvasAspect = width / height;
@@ -223,6 +221,7 @@
           });
       }
     }
+    text('v0.21', 15, 15);
 
     // Target Box
     noFill();
@@ -247,7 +246,7 @@
     fill(255); // White color to differentiate from the barcode number
     textSize(18);
     text(countryData[0], width / 2, height - 40);
-    const imgElement = document.getElementById(countryData[1]);
+    image(countryData[1], 50, 0);
   }
 
   function windowResized() {

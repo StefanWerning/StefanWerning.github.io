@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>p5.js Barcode Scanner</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  
+  <style>
+    body { 
+      margin: 0; 
+      padding: 0; 
+      overflow: hidden; 
+      background-color: #222; 
+      font-family: sans-serif;
+    }
+    canvas { 
+      display: block; 
+    }
+  </style>
+</head>
+<body>
+
+<script>
+  let capture;
+  let barcodeText = "Point camera at a barcode...";
+  let barcodeDetector;
+
+  function setup() {
+    createCanvas(windowWidth, windowHeight);
+
+    // 1. Request the rear camera (environment facing)
+    let constraints = {
+      video: {
+        facingMode: { exact: "environment" } // Forces back camera on mobile
+      },
+      audio: false
+    };
+
+    // Fallback if exact environment camera fails (e.g., on desktop)
+    try {
+      capture = createCapture(constraints);
+    } catch (e) {
+      capture = createCapture(VIDEO);
+    }
+    
+    capture.hide(); // Hide the default HTML video element created by p5
+
+    // 2. Initialize the BarcodeDetector API
+    // Note: This is a modern web API. It works beautifully on Chrome/Android, 
+    // but may have limited support on older iOS versions.
+    if ('BarcodeDetector' in window) {
+      barcodeDetector = new BarcodeDetector({ 
+        formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e'] 
+      });
+    } else {
+      barcodeText = "Barcode Detection API not supported on this browser.";
+    }
+  }
+
+  function draw() {
+    background(34);
+
+    // Draw the camera feed to the canvas if it's ready
+    if (capture.width > 0) {
+      // Calculate aspect ratio to fit the screen nicely
+      let videoAspect = capture.width / capture.height;
+      let canvasAspect = width / height;
+      let drawWidth, drawHeight;
+
+      if (canvasAspect > videoAspect) {
+        drawWidth = width;
+        drawHeight = width / videoAspect;
+      } else {
+        drawHeight = height;
+        drawWidth = height * videoAspect;
+      }
+
+      // Center the video
+      let x = (width - drawWidth) / 2;
+      let y = (height - drawHeight) / 2;
+
+      image(capture, x, y, drawWidth, drawHeight);
+
+      // 3. Scan the video frame for barcodes
+      // We only check every 10 frames to keep the app running smoothly and save battery
+      if (barcodeDetector && frameCount % 10 === 0) {
+        barcodeDetector.detect(capture.elt)
+          .then(barcodes => {
+            if (barcodes.length > 0) {
+              // Get the value of the first barcode detected
+              barcodeText = barcodes[0].rawValue;
+            }
+          })
+          .catch(err => {
+            console.error(err);
+          });
+      }
+    }
+
+    // 4. Draw the UI (Target box and Text display)
+    
+    // Draw a visual target box in the center
+    noFill();
+    stroke(0, 255, 0);
+    strokeWeight(4);
+    rectMode(CENTER);
+    rect(width / 2, height / 2, width * 0.7, height * 0.2, 20);
+
+    // Draw the text box at the bottom
+    rectMode(CORNER);
+    fill(0, 150);
+    noStroke();
+    rect(0, height - 100, width, 100);
+
+    // Display the barcode text
+    fill(0, 255, 0);
+    textSize(24);
+    textAlign(CENTER, CENTER);
+    text(barcodeText, width / 2, height - 50);
+  }
+
+  // Adjust canvas if the user rotates their phone
+  function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+  }
+</script>
+
+</body>
+</html>

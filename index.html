@@ -149,14 +149,14 @@
 
     for (let i = 0; i < gs1Ranges.length; i++) {
       if (prefix >= gs1Ranges[i].min && prefix <= gs1Ranges[i].max) {
-        tmp="";
-        if (gs1Ranges[i].img.length != 0) tmp="<img src='"+gs1Ranges[i].img+"'>";
-        return "Country: " + gs1Ranges[i].name+tmp;
+        let tmp="";
+        if (gs1Ranges[i].img.length != 0) tmp=gs1Ranges[i].img;
+        return [gs1Ranges[i].name,tmp];
       }
     }
     
     // EAN/UPC prefixes not on the list are reserved for future use or internal 
-    return "Country: Unknown / Reserved";
+    return "Country Unknown / Reserved";
   }
 
   function setup() {
@@ -215,7 +215,7 @@
               
               // NEW LOGIC: Slice the first 3 characters and get the country
               let prefixStr = barcodeText.substring(0, 3);
-              countryText = getCountryFromPrefix(prefixStr);
+              countryData = getCountryFromPrefix(prefixStr);
             }
           })
           .catch(err => {
@@ -246,7 +246,8 @@
     // Display the calculated country
     fill(255); // White color to differentiate from the barcode number
     textSize(18);
-    text(countryText, width / 2, height - 40);
+    text(countryData[0], width / 2, height - 40);
+    const imgElement = document.getElementById(countryData[1]);
   }
 
   function windowResized() {

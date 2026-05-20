@@ -15,8 +15,6 @@ let img;
 let myimg;
 let boardimg;
 let col;
-let count=-1;
-let tmpcount=-1;
 
 function preload () {
   mysound = loadSound("beep.mp3");
@@ -131,7 +129,7 @@ function setup() {
         isDragging: false,
         offsetX: 0,
         offsetY: 0,
-        rotation: 0,      
+        rotation: currentPlayerIndex,      
         wasDragged: false // Tracks if the mouse moved while holding it
       });
       
@@ -167,17 +165,16 @@ function draw() {
     
   // Draw a semi-transparent black banner at the bottom
   fill(0, 180);
-  rect(0, height - 100, 900, 100);
+  rect(0, 500, 640, 100);
   
   // Display the scanned code and corresponding country
   fill(255);
   textSize(14);
   textAlign(CENTER, CENTER);
-  text(count+1,100,110);
-  text(`Barcode: ${scannedCode}`, 450, height - 70);
+  text(`Barcode: ${scannedCode}`, 320, 510);
   fill(100, 255, 100); // Light green text for the country
-  text(`Origin Country: ${detectedCountry}`, 450, height - 50);
-  text(productstr, 450, height - 30);  
+  text(`Origin Country: ${detectedCountry}`, 320, 530);
+  text(productstr, 320, 550);  
   
   let currentColor = playerColors[currentPlayerIndex]; 
   
@@ -191,7 +188,6 @@ function draw() {
   // Reset stroke settings so it doesn't affect the next frame
   noStroke(); 
   strokeWeight(0);
-  
 }
 
 
@@ -343,28 +339,28 @@ function createCardGraphic(stats, playerColor) {
   pg.push();
   pg.translate(centerpoint, edgePadding + 5);
   pg.rotate(PI);
-  pg.text(`STR: ${stats.strength}`, 0, 0);
+  pg.text(`${stats.strength}`, 0, 0);
   pg.pop();
 
   // B. RIGHT (Faces Right)
   pg.push();
   pg.translate(boxSize - edgePadding - 5, centerpoint);
   pg.rotate(-HALF_PI);
-  pg.text(`SPD: ${stats.speed}`, 0, 0);
+  pg.text(`${stats.speed}`, 0, 0);
   pg.pop();
 
   // C. BOTTOM (Faces Down)
   pg.push();
   pg.translate(centerpoint, boxSize - edgePadding - 5);
   pg.rotate(-PI);
-  pg.text(`DEF: ${stats.defense}`, 0, 0);
+  pg.text(`${stats.defense}`, 0, 0);
   pg.pop();
 
   // D. LEFT (Faces Left)
   pg.push();
   pg.translate(edgePadding + 5, centerpoint);
   pg.rotate(HALF_PI);
-  pg.text(`POW: ${stats.power}`, 0, 0);
+  pg.text(`${stats.power}`, 0, 0);
   pg.pop();
 
   // Draw the name in a nice gold color

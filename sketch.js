@@ -19,7 +19,7 @@ let col;
 function preload () {
   mysound = loadSound("beep.mp3");
   img = loadImage('all_the_sprites_grey.png');
-  boardimg = loadImage('Chessboard_5x5_green.jpg');
+  boardimg = loadImage('barcodebattlers.png');
   myimg = createImage(32,32);
 }
 
@@ -53,7 +53,8 @@ const endSyllables = [
 ];
 
 function setup() {
-  createCanvas(1920, 1080);
+  //createCanvas(1920, 1080);
+  createCanvas(1536, 864);
   
   document.oncontextmenu = () => false; // prevent right-click menu
   
@@ -124,29 +125,27 @@ function setup() {
       
       cards.push({
         img: cardImage,
-        x: mouseX - 100, // Center the 200x200 card on the mouse
-        y: mouseY - 100,
+        x: 320-85,
+        y: 340-85,
         isDragging: false,
         offsetX: 0,
         offsetY: 0,
         rotation: currentPlayerIndex,      
         wasDragged: false // Tracks if the mouse moved while holding it
       });
-      
-      
     }
   });
 }
 
 function draw() {
   background(0);
-  
+  image(boardimg, 0,0,width,height);
+
   // Draw the webcam video to the canvas
   if (video) {
     //image(video, 20, height-500, 640, 480);
     image(video, 0,0, 640, 480);
   }
-  image(boardimg, width-1040,40, 1000, 1000);
   
   imageMode(CENTER); // Draw from center to make rotation math easy
   
@@ -157,7 +156,7 @@ function draw() {
     // Rotate by 90 degrees (HALF_PI) for each click
     rotate(HALF_PI * card.rotation); 
     // Draw the image at 0,0 (which is now the translated center)
-    image(card.img, 0, 0); 
+    image(card.img, 0, 0,170,170); 
     pop();
   }
   
@@ -176,10 +175,12 @@ function draw() {
   text(`Origin Country: ${detectedCountry}`, 320, 530);
   text(productstr, 320, 550);  
   
+  text("v1.0",35,height-35);
+  
   let currentColor = playerColors[currentPlayerIndex]; 
   
   stroke(currentColor[0], currentColor[1], currentColor[2]);
-  strokeWeight(30); // Make the border thick and visible
+  strokeWeight(15); // Make the border thick and visible
   noFill(); // Don't fill the inside of the rectangle
   
   // Draw the rectangle around the edge of the canvas
@@ -188,6 +189,8 @@ function draw() {
   // Reset stroke settings so it doesn't affect the next frame
   noStroke(); 
   strokeWeight(0);
+  
+
 }
 
 
